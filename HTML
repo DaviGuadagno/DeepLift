@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronLog · DeepSeek Training</title>
+    <!-- Paleta oficial: Preto profundo + Azul elétrico -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background-color: #0a0c0f;
+            color: #d9e9ff;
+            padding: 2rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* HEADER com brilho azul */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            border-bottom: 3px solid #1e90ff;
+            padding-bottom: 0.8rem;
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: white;
+            line-height: 1;
+        }
+
+        .logo span {
+            color: #1e90ff;
+            font-weight: 300;
+            font-size: 1.8rem;
+        }
+
+        .deepseek-badge {
+            background: #11161a;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            border: 1px solid #1e90ff55;
+            color: #8ab4f8;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        /* TIMER GLOBAL */
+        .timer-panel {
+            background: #0e1217;
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #1e90ff33;
+            box-shadow: 0 8px 0 #0b0e11;
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+        }
+
+        .timer-number {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #1e90ff;
+            font-family: 'Fira Mono', monospace;
+            line-height: 1;
+            text-shadow: 0 0 8px #1e90ff66;
+        }
+
+        .timer-label {
+            font-size: 1rem;
+            color: #a0c6ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1.5px solid #1e90ff;
+            color: #1e90ff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #1e90ff;
+            color: #0a0c0f;
+            border-color: #1e90ff;
+        }
+
+        .btn.active {
+            background: #1e90ff;
+            color: black;
+            font-weight: 700;
+        }
+
+        .input-timer {
+            background: #0a0c0f;
+            border: 1px solid #1e90ff;
+            color: white;
+            padding: 0.7rem 1rem;
+            border-radius: 40px;
+            width: 90px;
+            text-align: center;
+            font-weight: 600;
+            outline: none;
+        }
+
+        /* ABAS DE DIAS */
+        .day-tabs {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #1e90ff22;
+            padding-bottom: 0.8rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #98b9e6;
+            padding: 0.7rem 1.6rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .tab-btn:hover {
+            border-color: #1e90ff88;
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: #1e90ff;
+            color: #0a0c0f;
+            border-color: #1e90ff;
+            font-weight: 700;
+        }
+
+        /* CARDS DE TREINO */
+        .day-card {
+            display: none;
+            animation: fade 0.2s ease;
+        }
+
+        .day-card.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        .exercise-group {
+            background: #0e1319;
+            border-radius: 24px;
+            padding: 1.8rem 1.5rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #1e90ff1a;
+            box-shadow: 0 6px 0 #080b0e;
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .group-title i {
+            color: #1e90ff;
+            font-size: 1.8rem;
+        }
+
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .exercise-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem 1.5rem;
+            background: #0a0f14;
+            padding: 0.9rem 1.5rem;
+            border-radius: 16px;
+            border-left: 5px solid #1e90ff;
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            color: white;
+            min-width: 180px;
+            font-size: 1.1rem;
+        }
+
+        .input-field {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #0e151c;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            border: 1px solid #1e90ff55;
+        }
+
+        .input-field label {
+            font-size: 0.8rem;
+            color: #aac8ff;
+            text-transform: uppercase;
+        }
+
+        .input-field input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 600;
+            width: 60px;
+            padding: 0.5rem 0;
+            outline: none;
+            border-bottom: 1px solid #1e90ff;
+            text-align: center;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #1e90ff;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .checkbox-done {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-left: auto;
+        }
+
+        .checkbox-done label {
+            font-size: 0.85rem;
+            color: #b0d0ff;
+        }
+
+        /* responsivo */
+        @media (max-width: 700px) {
+            .exercise-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .checkbox-done {
+                margin-left: 0;
+            }
+            .timer-panel {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        .footer-note {
+            margin-top: 3rem;
+            text-align: center;
+            color: #46658b;
+            font-size: 0.85rem;
+            border-top: 1px solid #1e90ff22;
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER IRONLOG -->
+        <header>
+            <div class="logo">
+                <h1>IRON<span>LOG</span></h1>
+                <div class="deepseek-badge">⚡ DEEPSEEK PALETTE</div>
+            </div>
+            <div class="deepseek-badge">🔵 PRETO + AZUL</div>
+        </header>
+
+        <!-- TIMER DE INTERVALO -->
+        <div class="timer-panel">
+            <div class="timer-display">
+                <span class="timer-number" id="timerValue">60</span>
+                <span class="timer-label">segundos</span>
+            </div>
+            <div class="timer-controls">
+                <input type="number" id="timerInput" class="input-timer" value="60" min="5" max="300">
+                <button id="startTimerBtn" class="btn">▶ INICIAR</button>
+                <button id="resetTimerBtn" class="btn">⟲ RESET</button>
+            </div>
+        </div>
+
+        <!-- ABAS DOS DIAS DE TREINO -->
+        <div class="day-tabs">
+            <button class="tab-btn active" data-day="segunda">💪 SEGUNDA · Peito + Tríceps</button>
+            <button class="tab-btn" data-day="quarta">🦵 QUARTA · Pernas + Ombros</button>
+            <button class="tab-btn" data-day="quinta">💪 QUINTA · Costas + Bíceps</button>
+            <button class="tab-btn" data-day="sexta">🔥 SEXTA · Peito + Ombros (leve)</button>
+        </div>
+
+        <!-- ================ DIA: SEGUNDA ================ -->
+        <div id="segunda" class="day-card active">
+            <!-- Peito -->
+            <div class="exercise-group">
+                <div class="group-title">
+                    <span>🏋️ PEITO</span>
+                </div>
+                <div class="exercise-list">
+                    <div class="exercise-item" data-ex="sup45">
+                        <span class="exercise-name">Supino 45º</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <span class="exercise-name">Supino reto</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <span class="exercise-name">Crucifixo na máquina</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tríceps -->
+            <div class="exercise-group">
+                <div class="group-title">
+                    <span>💪 TRÍCEPS</span>
+                </div>
+                <div class="exercise-list">
+                    <div class="exercise-item">
+                        <span class="exercise-name">Tríceps corda</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <span class="exercise-name">Tríceps francês</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                    <div class="exercise-item">
+                        <span class="exercise-name">Tríceps scott</span>
+                        <div class="input-field">
+                            <label>KG</label>
+                            <input type="number" class="carga" placeholder="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label>REP</label>
+                            <input type="number" class="reps" placeholder="0" value="0">
+                        </div>
+                        <div class="checkbox-done">
+                            <input type="checkbox" class="done-check">
+                            <label>feito</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================ DIA: QUARTA ================ -->
+        <div id="quarta" class="day-card">
+            <!-- Pernas -->
+            <div class="exercise-group">
+                <div class="group-title">
+                    <span>🦵 PERNAS</span>
+                </div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Cadeira extensora</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Agachamento no smith</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Leg press 45º</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Mesa flexora</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Cadeira adutora/abdutora</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Panturrilha</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+            <!-- Ombros -->
+            <div class="exercise-group">
+                <div class="group-title"><span>🏋️ OMBROS</span></div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Desenvolvimento com halter</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Elevação lateral</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Crucifixo inverso</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================ DIA: QUINTA ================ -->
+        <div id="quinta" class="day-card">
+            <!-- Costas -->
+            <div class="exercise-group">
+                <div class="group-title"><span>🔥 COSTAS</span></div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Puxada aberta</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Remada unilateral</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Remada cavalinho</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Remada baixa</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+            <!-- Bíceps -->
+            <div class="exercise-group">
+                <div class="group-title"><span>💪 BÍCEPS</span></div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Rosca alternada</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Rosca scott</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Rosca W</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================ DIA: SEXTA ================ -->
+        <div id="sexta" class="day-card">
+            <div class="exercise-group">
+                <div class="group-title"><span>🔥 PEITO (LEVE/MODERADO)</span></div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Supino inclinado máquina</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Crucifixo na máquina</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+            <div class="exercise-group">
+                <div class="group-title"><span>🔥 OMBROS (LEVE)</span></div>
+                <div class="exercise-list">
+                    <div class="exercise-item"><span class="exercise-name">Elevação lateral</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Elevação frontal</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                    <div class="exercise-item"><span class="exercise-name">Crucifixo inverso</span><div class="input-field"><label>KG</label><input type="number" class="carga" value="0"></div><div class="input-field"><label>REP</label><input type="number" class="reps" value="0"></div><div class="checkbox-done"><input type="checkbox" class="done-check"><label>feito</label></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-note">
+            IRONLOG — Seu registro de ferro. Cargas e repetições salvam automaticamente. 🔵⚫
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            // ---------- TIMER ----------
+            let timerInterval;
+            let timeLeft = 60;
+            const timerValueEl = document.getElementById('timerValue');
+            const timerInput = document.getElementById('timerInput');
+            const startBtn = document.getElementById('startTimerBtn');
+            const resetBtn = document.getElementById('resetTimerBtn');
+
+            function updateTimerDisplay() {
+                timerValueEl.textContent = timeLeft;
+            }
+
+            function startTimer() {
+                if (timerInterval) clearInterval(timerInterval);
+                if (timeLeft <= 0) {
+                    timeLeft = parseInt(timerInput.value) || 60;
+                }
+                timerInterval = setInterval(() => {
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        // Alerta sutil
+                        timerValueEl.style.color = '#ff5555';
+                        setTimeout(() => timerValueEl.style.color = '#1e90ff', 1000);
+                    } else {
+                        timeLeft--;
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+            }
+
+            startBtn.addEventListener('click', function() {
+                if (timerInterval) clearInterval(timerInterval);
+                timeLeft = parseInt(timerInput.value) || 60;
+                updateTimerDisplay();
+                startTimer();
+            });
+
+            resetBtn.addEventListener('click', function() {
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = null;
+                timeLeft = parseInt(timerInput.value) || 60;
+                updateTimerDisplay();
+                timerValueEl.style.color = '#1e90ff';
+            });
+
+            // Inicializa timer display
+            timeLeft = parseInt(timerInput.value) || 60;
+            updateTimerDisplay();
+
+            // ---------- ABAS DE DIAS ----------
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const dayCards = {
+                segunda: document.getElementById('segunda'),
+                quarta: document.getElementById('quarta'),
+                quinta: document.getElementById('quinta'),
+                sexta: document.getElementById('sexta')
+            };
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const day = this.dataset.day;
+                    for (let d in dayCards) {
+                        dayCards[d].classList.remove('active');
+                    }
+                    if (dayCards[day]) dayCards[day].classList.add('active');
+                });
+            });
+
+            // ---------- SALVAR DADOS NO LOCALSTORAGE ----------
+            function saveAllData() {
+                const allExercises = [];
+                document.querySelectorAll('.exercise-item').forEach((item, index) => {
+                    const carga = item.querySelector('.carga')?.value || '0';
+                    const reps = item.querySelector('.reps')?.value || '0';
+                    const check = item.querySelector('.done-check')?.checked || false;
+                    allExercises.push({ carga, reps, check });
+                });
+                localStorage.setItem('ironlog_training_v1', JSON.stringify(allExercises));
+            }
+
+            function loadAllData() {
+                const stored = localStorage.getItem('ironlog_training_v1');
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        const inputs = document.querySelectorAll('.exercise-item');
+                        inputs.forEach((item, idx) => {
+                            if (data[idx]) {
+                                const cargaField = item.querySelector('.carga');
+                                const repsField = item.querySelector('.reps');
+                                const checkField = item.querySelector('.done-check');
+                                if (cargaField) cargaField.value = data[idx].carga || '0';
+                                if (repsField) repsField.value = data[idx].reps || '0';
+                                if (checkField) checkField.checked = data[idx].check || false;
+                            }
+                        });
+                    } catch (e) {}
+                }
+            }
+
+            // Event listeners para salvar automaticamente
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('carga') || e.target.classList.contains('reps') || e.target.classList.contains('done-check')) {
+                    saveAllData();
+                }
+            });
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('done-check')) {
+                    saveAllData();
+                }
+            });
+
+            // Carregar dados salvos
+            loadAllData();
+
+            // Ajuste timer input min
+            timerInput.addEventListener('change', function() {
+                let val = parseInt(this.value);
+                if (val < 5) this.value = 5;
+                if (val > 300) this.value = 300;
+                if (!timerInterval) {
+                    timeLeft = parseInt(this.value) || 60;
+                    updateTimerDisplay();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
